@@ -1,0 +1,50 @@
+model{ # Vectors used for the calculation of DIC
+  for ( i in 1:n ) {
+       y1[i] <- goals1[i]
+       y2[i] <- goals1[i]
+       y3[i] <- goals1[i]
+       y4[i] <- goals1[i]
+       y5[i] <- goals1[i]
+       y6[i] <- goals1[i]
+       y7[i] <- goals1[i]
+       y8[i] <- goals1[i]
+       y9[i] <- goals2[i]
+       y10[i] <- goals2[i]
+       y11[i] <- goals2[i]
+       y12[i] <- goals2[i]
+       y1[i]~dpois( lambda1[i,1] )
+       y2[i]~dpois( lambda1[i,2] )
+    y3[i]~dpois( lambda1[i,3] )
+       y4[i]~dpois( lambda1[i,4] )
+       y5[i]~dpois( lambda1[i,5] )
+       y6[i]~dpois( lambda1[i,6] )
+       y7[i]~dpois( lambda1[i,7] )
+       y8[i]~dpois( lambda1[i,8] )
+       y9[i]~dpois( lambda2[i,9] )
+       y10[i]~dpois( lambda2[i,10] )
+       y11[i]~dpois( lambda2[i,11] )
+       y12[i]~dpois( lambda2[i,12] )
+    }
+ 
+   # Poisson model likelihood
+   for ( k in 1:12 ) { 
+       for ( i in 1:n ) {
+             log( lambda1[i,k] ) <- beta[1,k] + gamma1[k]*beta[2,k]*home + gamma2[k]*beta[3,k]*a[ ht[i] ] + gamma3[k]*beta[4,k]*d[ at[i] ]
+             log( lambda2[i,k] ) <- beta[1,k] + gamma2[k]*beta[3,k]*a[ at[i] ] + gamma3[k]*beta[4,k]*d[ ht[i] ]
+        } }
+
+   # STZ constraints		
+		a[1]<-  -sum( a[2:20] )
+		d[1]<-  -sum( d[2:20] )
+
+  # Priors
+    home~dnorm(0,0.001)
+    for ( k in 1:12) {
+         for ( j in 1:4) {
+               beta[j,k]~dnorm(0,0.001)
+     } }
+     for (i in 2:K){
+				a[i]~dnorm(0,0.01)
+				d[i]~dnorm(0,0.01)
+	}      
+}

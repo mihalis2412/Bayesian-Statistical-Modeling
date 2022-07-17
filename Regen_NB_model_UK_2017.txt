@@ -1,0 +1,54 @@
+model{
+		for (i in 1:n){ 	
+		       # stochastic component
+		       goals1[i]~dnegbin( p1[i], r)
+		       goals2[i]~dnegbin( p2[i], r)
+		       # link and linear predictor
+		       p1[i] <- r/(r+lambda1[i])
+		       p2[i] <- r/(r+lambda2[i])
+		       log(lambda1[i] ) <- mu + home + a[ ht[i] ] + d[ at[i] ]
+			   log(lambda2[i])  <-  mu             + a[ at[i] ] + d[ ht[i] ]
+		}
+        # STZ constraints		
+		a[1]<-  -sum( a[2:20] )
+		d[1]<-  -sum( d[2:20] )
+		#
+		# prior distributions
+		r ~ dgamma( 0.001, 0.001 )
+		mu~dnorm(0,0.001)
+		home~dnorm(0,0.001)
+		for (i in 2:K){
+				a[i]~dnorm(0,0.01)
+				d[i]~dnorm(0,0.01)
+		}
+
+	
+           for (i in 1:20){ 
+              for (j in 1:20) { 
+              # replicated league 
+                 goals1.rep[i,j]~dpois(lambda1.rep[i,j]) 
+                 goals2.rep[i,j]~dpois(lambda2.rep[i,j]) 
+              # link and linear predictor 
+                 log(lambda1.rep[i,j]) <- mu + home + a[ i ] + d[ j ] 
+                 log(lambda2.rep[i,j]) <- mu             + a[ j ] + d[ i ] 
+              # replicated difference 
+                 goal.diff.rep[i,j] <- goals1.rep[i,j] - goals2.rep[i,j]
+              # points earned by each home team (i)
+			     points1[i,j] <- 3*(1-step(-goal.diff.rep[i,j])) + 1*equals(goal.diff.rep[i,j],0)
+			  # points earned by each away team (j)
+			     points2[i,j] <- 3*(1-step( goal.diff.rep[i,j])) + 1*equals(goal.diff.rep[i,j],0)
+  }
+ }
+        # calculation of the total points for each team 
+            for (i in 1:K){
+                total.points[i] <- sum( points1[i,1:20] ) -  points1[i,i] + sum( points2[1:20,i] ) -  points2[i,i] 
+       }
+      	  
+        # ranking probabilities 
+	         for (i in 1:K){ 
+	             ranks[i] <- 21-rank(total.points[], i) 
+	         for (j in 1:K){
+	             rank.probs[i,j] <- equals( ranks[i], j )
+	    }
+	 } 
+}

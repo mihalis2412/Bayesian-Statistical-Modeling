@@ -1,0 +1,22 @@
+﻿model { 
+for (i in 1:n) { # Stochastic component
+     goals1[i] ~ dpois(lambda1[i])
+     goals2[i] ~ dpois(lambda2[i])
+
+# Link function and linear predictor
+     log(lambda1[i]) <- mu + home + a[ ht[i] ] + d[ at[i] ] 
+     log(lambda2[i]) <- mu       + a[ at[i] ] + d[ ht[i] ]
+   }
+
+# STZ constraints
+a[1] <- -sum( a[2:20] )
+d[1] <- -sum( d[2:20] )
+  
+# Prior distributions
+mu ~ dnorm(0, 0.001)
+home ~ dnorm( 0, 0.001)
+for (i in 2:K) {
+      a[i] ~ dnorm(0,0.01)
+      d[i] ~ dnorm(0,0.01)
+   }
+}

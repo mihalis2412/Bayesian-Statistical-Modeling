@@ -1,0 +1,26 @@
+model{
+      for (i in 1:n){ 	
+		     # stochastic component
+		     goals1[i]~dpois(lambda1[i])       
+		     goals2[i]~dpois(lambda2[i])       
+		     # link and linear predictor
+		log(lambda1[i])<-  mu + home + a[ ht[i] ] + d[ at[i] ] + u[i] +b[i]
+		log(lambda2[i])<-  mu             + a[ at[i] ] + d[ ht[i] ] + u[i] +b[i]
+		u[i]~dnorm(0,tau1)
+                b[i]~dnorm(0,tau2)
+	}
+        # STZ constraints		
+		a[1]<-  -sum( a[2:20] )
+		d[1]<-  -sum( d[2:20] )
+		
+        # prior distributions
+		mu~dnorm(0,0.001)
+		home~dnorm(0,0.001)
+		tau1~dgamma(0.001,0.001) # Hyper prior for tau1
+                tau2~dgamma(0.001,0.001) # Hyper prior for tau2
+
+		for (i in 2:K){
+				a[i]~dnorm(0,0.01)
+				d[i]~dnorm(0,0.01)
+	}    
+}
